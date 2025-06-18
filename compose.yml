@@ -1,0 +1,11 @@
+name: sunny
+services:
+  sunny:
+    volumes:
+      - ./config.json:/tmp/config.json
+      - indexes:/tmp/indexes/
+    restart: unless-stopped
+    container_name: sunny
+    image: bogthemudwing/sunny
+volumes:
+  indexes:
