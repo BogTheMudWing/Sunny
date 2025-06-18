@@ -38,7 +38,7 @@ See the documentation at https://sunny.macver.org/start.
 
 ## Development
 
-To build the project from source, simply run the command `./gradlew build shadowJar`. The completed jar will appear in `build/libs/sunny-v*.jar`.
+To build the project from source, simply run the command `./gradlew shadowJar`. The completed jar will appear in `build/libs/Sunny-v*.jar`.
 
 ## Contributing
 
@@ -58,3 +58,4 @@ There are many ways in which you can contribute:
 - IntelliJ, for developing a great IDE.
 - Jackson, for the JSON serialization library.
 - LanguageTool, for spell checking.
+- VitePress, for the awesome documentation site.

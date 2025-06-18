@@ -68,7 +68,7 @@ You need to have Java 21 installed.
 
 Download the application from GitHub to a convenient location. It is best to put it in its own folder. The file you want with `.jar`.
 
-https://github.com/BogTheMudWing/releases
+https://github.com/BogTheMudWing/Sunny/releases
 
 In the same folder as the application, create a file called `config.json` and insert this text:
 
