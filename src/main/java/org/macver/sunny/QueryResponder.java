@@ -94,11 +94,13 @@ public class QueryResponder implements EventListener {
 
             // Don't process bot messages
             if (event.getAuthor().isBot()) {
+                Sunny.logger.info("Ignoring bot message.");
                 return;
             }
 
             // Ignore DMs
             if (!event.getChannelType().isGuild()) {
+                Sunny.logger.info("Ignoring private message.");
                 return;
             }
 
@@ -106,17 +108,23 @@ public class QueryResponder implements EventListener {
             List<Index> indexes;
             try {
                 indexes = new IndexManager().getIndexes(event.getGuild());
+                Sunny.logger.info("Retrieved {} indexes for guild.", indexes.size());
             } catch (IOException e) {
+                Sunny.logger.warn("Failed to retrieve indexes: {}\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                new Reporter().report( "Failed to retrieve indexes: " + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
                 return;
             }
             boolean channelValid = false;
             for (Index index : indexes) {
+                Sunny.logger.info("Checking index {} for matching channel.", indexes.indexOf(index));
                 if (index.channels.contains(event.getChannel().getIdLong())) {
+                    Sunny.logger.info("Found matching channel.");
                     channelValid = true;
                     break;
                 }
             }
             if (!channelValid) {
+                Sunny.logger.info("Did not find matching channel.");
                 return;
             }
 
@@ -127,6 +135,7 @@ public class QueryResponder implements EventListener {
             String selfMention = event.getJDA().getSelfUser().getAsMention();
             if (contentRaw.contains(selfMention)) {
                 if (contentRaw.replaceAll(selfMention, "").isBlank()) {
+                    Sunny.logger.info("Query contains only mention.");
                     // If message contains only a mention, send an introduction
                     Member selfMember = event.getGuild().getMember(event.getJDA().getSelfUser());
                     assert selfMember != null;
@@ -136,6 +145,7 @@ public class QueryResponder implements EventListener {
                     event.getMessage().reply(String.format(reply, selfMember.getEffectiveName(), event.getGuild().getName())).queue();
                     return;
                 } else {
+                    Sunny.logger.info("Query contains mention.");
                     // If message is mention and other text, note it
                     mentioned = true;
                 }
@@ -143,18 +153,26 @@ public class QueryResponder implements EventListener {
 
             // If not mentioned and the user is on cooldown, do not process the message
             if (!mentioned && cooldownManager.isUserOnCoolDown(event.getAuthor())) {
+                Sunny.logger.info("Ignoring user on cooldown.");
                 return;
             }
 
             // Get the query
             String query = event.getMessage().getContentDisplay();
+            // Remove mention if present
+            if (mentioned) {
+                query = query.replaceAll("@" + event.getGuild().getSelfMember().getEffectiveName(), "").strip();
+            }
 
             // Correct the spelling
             String correctedQuery;
             try {
                 GuildConfiguration guildConfiguration = guildManager.getGuildConfiguration(event.getGuild());
                 correctedQuery = spellChecker.correctSpelling(query, guildConfiguration.noCorrectionPhrases);
+                Sunny.logger.info("Corrected spelling.");
             } catch (IOException e) {
+                Sunny.logger.warn("Spell correction failed: {}\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                new Reporter().report( "Failed to retrieve indexes: " + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
                 correctedQuery = query;
             }
 
@@ -162,27 +180,52 @@ public class QueryResponder implements EventListener {
             SearchResult answerResult;
             try {
                 answerResult = new Searcher().findRelevantDocument(event.getGuild(), event.getChannel(), correctedQuery);
+                Sunny.logger.info("Got a possible answer.");
             } catch (IOException e) {
+                Sunny.logger.warn("Failed to search for an answer: {}\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                new Reporter().report( "Failed to search for an answer: " + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
                 return;
             }
-            Answer answer = answerResult.answer;
-            double confidence = answerResult.confidence;
 
-            if (mentioned && (answer == null || confidence < mentionedPickiness || answer.minimumConfidence < mentionedPickiness)) {
+            Map<Double, Answer> answers = answerResult.answers;
+
+            Answer topAnswer = null;
+            double highestAnswerConfidence = 0;
+
+            if (answers != null && !answers.isEmpty()) {
+                // If there are possible answers, find the best one
+                for (Double answerConfidence : answers.keySet()) {
+                    Answer answer = answers.get(answerConfidence);
+
+                    // Set threshold
+                    double confidenceThreshold = answer.minimumConfidence;
+                    if (mentioned) confidenceThreshold = mentionedPickiness;
+
+                    // If this is the highest-confidence answer, and it passes thresholds, set it as best
+                    if (answerConfidence > confidenceThreshold && answerConfidence > highestAnswerConfidence) {
+                        topAnswer = answer;
+                        highestAnswerConfidence = answerConfidence;
+                    }
+                }
+            }
+
+            if (mentioned && topAnswer == null) {
                 // Reply if mentioned but no result
+                Sunny.logger.info("Result not satisfactory. Replying because mentioned.");
                 String reply = mentionNotFoundReplies.get(new Random().nextInt(mentionNotFoundReplies.size()));
                 event.getMessage().reply(reply).queue();
                 return;
-            } else if (!mentioned && (answer == null || confidence < answer.minimumConfidence)) {
+            } else if (!mentioned && topAnswer == null) {
                 // Don't reply if not mentioned and no result
+                Sunny.logger.info("Result not satisfactory. Quietly giving up.");
                 return;
             }
 
             // Otherwise, reply!
-            String confidencePercent = String.valueOf(Math.round( confidence * 100)).concat("%");
+            String confidencePercent = String.valueOf(Math.round( highestAnswerConfidence * 100)).concat("%");
             EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setColor(Color.getHSBColor(56,83,88)).setTitle(answer.title).setDescription(answer.content);
-            if (answer.url != null) embedBuilder.setUrl(answer.url);
+            embedBuilder.setColor(Color.getHSBColor(56,83,88)).setTitle(topAnswer.title).setDescription(topAnswer.content);
+            if (topAnswer.url != null) embedBuilder.setUrl(topAnswer.url);
             ActionRow actionRow = ActionRow.of(Button.success("answer", "Mark as answer"), Button.secondary("unhelpful", "Not helpful"));
 
             // Change reply if mentioned
@@ -193,7 +236,7 @@ public class QueryResponder implements EventListener {
                     .addEmbeds(embedBuilder.build()).addComponents(actionRow);
 
             // Add link button if URL exists
-            if (answer.url != null) actionRow.getComponents().add(Button.link(answer.url, "Open resource"));
+            if (topAnswer.url != null) actionRow.getComponents().add(Button.link(topAnswer.url, "Open resource"));
 
             messageCreateAction.queue();
 

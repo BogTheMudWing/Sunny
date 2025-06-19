@@ -286,7 +286,7 @@ public class IndexCommand implements SlashCommand {
                         answer.content = content;
                         answer.url = url;
                         answer.query = query != null ? List.of(query.split(";")) : new ArrayList<>();
-                        answer.minimumConfidence = Objects.requireNonNullElse(minimumConfidence, 0.5);
+                        answer.minimumConfidence = Objects.requireNonNullElse(minimumConfidence, 0.2);
 
                         // Add to index
                         try {

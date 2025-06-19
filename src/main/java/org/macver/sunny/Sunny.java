@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 public class Sunny {
 
@@ -25,10 +26,16 @@ public class Sunny {
     public static void main(String[] args) throws InterruptedException, IOException {
 
         ObjectMapper mapper = new ObjectMapper();
-        config = mapper.readValue(new File("config.json"), new TypeReference<AppConfiguration>() {});
+        File config = new File("config.json");
+        if (!Files.exists(config.toPath())) {
+            logger.error("config.json does not exist.");
+            return;
+        }
+        Sunny.config = mapper.readValue(config, new TypeReference<>() {
+        });
 
         // Note: It is important to register your ReadyListener before building
-        jda = JDABuilder.createDefault(config.botToken)
+        jda = JDABuilder.createDefault(Sunny.config.botToken)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT) // enables explicit access to message.getContentDisplay()
                 .addEventListeners(new QueryResponder())
                 .build();

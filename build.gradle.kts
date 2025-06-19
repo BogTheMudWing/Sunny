@@ -16,7 +16,6 @@ dependencies {
     implementation("net.dv8tion:JDA:5.6.1") {
         exclude(module = "opus-java")
     }
-    implementation("org.apache.commons:commons-text:1.13.1") // Cosine similarity
     implementation("ch.qos.logback:logback-classic:1.5.13") // Logging
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0") // JSON serialization
     implementation("org.languagetool:language-en:6.6") // Spelling correction
