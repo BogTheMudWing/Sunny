@@ -232,7 +232,7 @@ public class QueryResponder implements EventListener {
             String reply = String.format(foundResultReplies.get(new Random().nextInt(foundResultReplies.size())), event.getAuthor().getAsMention());
             if (mentioned) reply = String.format(mentionFoundResultReplies.get(new Random().nextInt(mentionFoundResultReplies.size())), event.getAuthor().getAsMention());
 
-            MessageCreateAction messageCreateAction = event.getMessage().reply(reply  + "\n-# This result is a " + confidencePercent + " match. I interpreted your query as \"" + correctedQuery + "\".")
+            MessageCreateAction messageCreateAction = event.getMessage().reply(reply  + "\n-# This result is a " + confidencePercent + " match. I interpreted your query as \"" + String.join("\n-#", correctedQuery.split("\n")) + "\".")
                     .addEmbeds(embedBuilder.build()).addComponents(actionRow);
 
             // Add link button if URL exists
