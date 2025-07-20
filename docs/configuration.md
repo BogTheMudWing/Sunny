@@ -24,6 +24,28 @@ To remove a phrase:
 /configuration no_correction_phrases remove <phrase>
 ```
 
+## `ignored_roles`
+
+By default, Sunny responds to all user queries. You may want Sunny to ignore staff and support users. To do this, you can tell Sunny to ignore certain roles.
+
+To list all ignored roles:
+
+```
+/configuration ignored_roles list
+```
+
+To add a role:
+
+```
+/configuration ignored_roles add <role>
+```
+
+To remove a role:
+
+```
+/configuration ignored_roles remove <role>
+```
+
 ## Erase
 
 To erase all data, including configuration and indexes, you can use the command:

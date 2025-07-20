@@ -2,6 +2,7 @@ package org.macver.sunny.commands;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -44,6 +45,20 @@ public class ConfigureCommand extends ListenerAdapter implements SlashCommand {
                                         new SubcommandData("remove", "Remove a phrase which should not be autocorrected")
                                                 .addOptions(
                                                         new OptionData(OptionType.STRING, "phrase", "The phrase to remove.", true, true)
+                                                )
+                                )
+                )
+                .addSubcommandGroups(
+                        new SubcommandGroupData("ignore_roles", "Manage ignored roles.")
+                                .addSubcommands(
+                                        new SubcommandData("list", "List all roles that are ignored."),
+                                        new SubcommandData("add", "Add a role which should be ignored.")
+                                                .addOptions(
+                                                        new OptionData(OptionType.ROLE, "role", "The role to add to the ignore list.", true)
+                                                ),
+                                        new SubcommandData("remove", "Remove a role which is ignored")
+                                                .addOptions(
+                                                        new OptionData(OptionType.ROLE, "role", "The role to remove from the ignore list.", true)
                                                 )
                                 )
                 )
@@ -125,6 +140,85 @@ public class ConfigureCommand extends ListenerAdapter implements SlashCommand {
                     }
 
                     event.reply("Sure thing! I will try to autocorrect the phrase \"" + phrase + "\" just like everything else.").setEphemeral(true).queue();
+
+                }
+                case null, default -> doesNotExist(event);
+            }
+        } else if (Objects.equals(event.getSubcommandGroup(), "ignore_roles")) {
+            switch (event.getSubcommandName()) {
+                case "list" -> {
+                    List<String> ignoredRoles;
+                    try {
+                        ignoredRoles = guildManager.getGuildConfiguration(guild).ignoredRoles;
+                    } catch (IOException e) {
+                        ioError(event, e.getMessage());
+                        return;
+                    }
+                    if (ignoredRoles == null || ignoredRoles.isEmpty()) {
+                        event.reply("There are no roles on the ignore list.").setEphemeral(true).queue();
+                        return;
+                    }
+                    StringBuilder stringBuilder = new StringBuilder("Here are all the roles you have asked me to ignore:");
+                    for (String roleId : ignoredRoles) {
+                        Role role = event.getJDA().getRoleById(roleId);
+
+                        stringBuilder.append("\n- ");
+                        if (role != null) stringBuilder.append(role.getAsMention());
+                        else stringBuilder.append(roleId).append(" (does this one still exist?)");
+                    }
+                    event.reply(stringBuilder.toString()).setEphemeral(true).queue();
+                }
+                case "add" -> {
+                    Role role = event.getOption("role", OptionMapping::getAsRole);
+                    if (role == null) {
+                        missingOption(event, "role");
+                        return;
+                    }
+
+                    GuildConfiguration guildConfiguration;
+                    try {
+                        guildConfiguration = guildManager.getGuildConfiguration(guild);
+
+                        List<String> ignoredRoles = guildConfiguration.ignoredRoles;
+                        if (ignoredRoles == null) ignoredRoles = new ArrayList<>();
+
+                        ignoredRoles.add(role.getId());
+
+                        guildConfiguration.ignoredRoles = ignoredRoles;
+                        guildManager.saveGuildConfiguration(guild, guildConfiguration);
+                    } catch (IOException e) {
+                        ioError(event, e.getMessage());
+                        return;
+                    }
+
+                    event.reply("Sounds good! I won't answer queries from the role \"" + role.getName() + "\" anymore.").setEphemeral(true).queue();
+
+                }
+                case "remove" -> {
+                    Role role = event.getOption("role", OptionMapping::getAsRole);
+                    if (role == null) {
+                        missingOption(event, "role");
+                        return;
+                    }
+
+                    GuildConfiguration guildConfiguration;
+                    try {
+                        guildConfiguration = guildManager.getGuildConfiguration(guild);
+                        List<String> ignoredRoles = guildConfiguration.ignoredRoles;
+                        if (ignoredRoles == null) ignoredRoles = new ArrayList<>();
+                        boolean remove = ignoredRoles.remove(role.getId());
+                        if (!remove) {
+                            event.reply("You're in luck! I don't have that role on my *ignore-these-roles* list.").setEphemeral(true).queue();
+                            return;
+                        }
+                        guildConfiguration.ignoredRoles = ignoredRoles;
+                        guildManager.saveGuildConfiguration(guild, guildConfiguration);
+                    } catch (IOException e) {
+                        ioError(event, e.getMessage());
+                        return;
+                    }
+
+                    event.reply("Sure thing! I will try to answer queries from users with the the role \"" + role + "\" just like everyone else.").setEphemeral(true).queue();
 
                 }
                 case null, default -> doesNotExist(event);
