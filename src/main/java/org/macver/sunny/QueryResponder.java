@@ -3,6 +3,7 @@ package org.macver.sunny;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -120,6 +121,20 @@ public class QueryResponder implements EventListener {
                 return;
             }
 
+            // Check ignored roles
+            List<Role> userRoles = Objects.requireNonNull(event.getMember()).getRoles();
+            GuildConfiguration guildConfiguration;
+            try {
+                guildConfiguration = new GuildManager().getGuildConfiguration(event.getGuild());
+            } catch (IOException e) {
+                return;
+            }
+            List<String> userRoleIds = userRoles.stream().map(Role::getId).toList();
+            // returns false if the two collections have no elements in common
+            if (!Collections.disjoint(userRoleIds, guildConfiguration.ignoredRoles)) {
+                return;
+            }
+
             String contentRaw = event.getMessage().getContentRaw();
 
             // Check if mentioned
@@ -152,7 +167,6 @@ public class QueryResponder implements EventListener {
             // Correct the spelling
             String correctedQuery;
             try {
-                GuildConfiguration guildConfiguration = guildManager.getGuildConfiguration(event.getGuild());
                 correctedQuery = spellChecker.correctSpelling(query, guildConfiguration.noCorrectionPhrases);
             } catch (IOException e) {
                 correctedQuery = query;

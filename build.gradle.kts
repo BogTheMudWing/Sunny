@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "org.macver.sunny"
-version = "v1-1.0.0"
+version = "v1-1.1.0"
 
 repositories {
     mavenCentral()
@@ -30,6 +30,9 @@ tasks {
         manifest {
             attributes["Main-Class"] = "org.macver.sunny.Sunny"
         }
+    }
+    build {
+        dependsOn(shadowJar)
     }
 }
 
