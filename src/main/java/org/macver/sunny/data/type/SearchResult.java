@@ -2,18 +2,14 @@ package org.macver.sunny.data.type;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+
 public class SearchResult {
 
     @Nullable
-    public final Answer answer;
-    public final double confidence;
+    public final Map<Double, Answer> answers;
 
-    public SearchResult(@Nullable Answer answer, double confidence) {
-        this.answer = answer;
-        this.confidence = confidence;
-    }
-
-    public boolean isNone() {
-        return answer == null;
+    public SearchResult(@Nullable Map<Double, Answer> confidenceAnswerMap) {
+        answers = confidenceAnswerMap;
     }
 }

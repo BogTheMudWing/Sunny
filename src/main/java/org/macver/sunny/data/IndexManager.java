@@ -6,6 +6,7 @@ import org.macver.sunny.data.type.GuildConfiguration;
 import org.macver.sunny.data.type.Index;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class IndexManager {
@@ -13,7 +14,9 @@ public class IndexManager {
     private final GuildManager guildManager = new GuildManager();
 
     public List<Index> getIndexes(@NotNull Guild guild) throws IOException {
-        return guildManager.getGuildConfiguration(guild).indexes;
+        List<Index> indexes = guildManager.getGuildConfiguration(guild).indexes;
+        if (indexes == null) return new ArrayList<>();
+        return indexes;
     }
 
     public void save(Guild guild, List<Index> indexList) throws IOException {
