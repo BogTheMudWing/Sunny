@@ -62,4 +62,4 @@ There are many ways in which you can contribute:
 
 ---
 
-[![Bog The MudWing](https://nextcloud.macver.org/apps/files_sharing/publicpreview/Ljjxg4cstsAJreK?file=/&fileId=61781&x=3390&y=1910&a=true&etag=a48ae568556af8f77c56d1358730ccd0)](https://blog.macver.org/about-me)
+[![Bog The MudWing](https://blog.macver.org/content/images/2025/07/Stamp-Colored-Small-Shadow.png)](https://blog.macver.org/about-me)
