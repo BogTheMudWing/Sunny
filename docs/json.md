@@ -31,6 +31,9 @@ All Sunny data for your guild is stored in JSON format.
     ],
     "noCorrectionPhrases": [ // Words and phrases to not autocorrect.
         "server ip"
+    ],
+    "ignoredRoles": [ // Sunny will ignore users that have any of these roles.
+        "1342869531923578991"
     ]
 }
 ```
