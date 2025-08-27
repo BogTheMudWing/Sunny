@@ -26,7 +26,7 @@ You can add answers with this command:
 /index answer add <index> <title> <content> [<url>] [<query>] [<minimum_confidence>]
 ```
 
-`title` must not match another title in the same index. If not specified, `minimum_confidence` will default to 0.5 (50%).
+`title` must not match another title in the same index. If not specified, `minimum_confidence` will default to the recommended 0.2 (20%).
 
 ## Remove an Answer
 
