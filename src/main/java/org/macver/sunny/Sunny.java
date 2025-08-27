@@ -22,6 +22,7 @@ public class Sunny {
     public static AppConfiguration config;
     public static JDA jda;
     public static final Logger logger = LoggerFactory.getLogger(Sunny.class);
+    public static CommandManager commandManager;
 
     public static void main(String[] args) throws InterruptedException, IOException {
 
@@ -43,7 +44,7 @@ public class Sunny {
         // optionally block until JDA is ready
         jda.awaitReady();
 
-        final CommandManager commandManager = new CommandManager(jda,
+        commandManager = new CommandManager(jda,
                 new ConfigureCommand(),
                 new DataCommand(),
                 new IndexCommand()
@@ -51,5 +52,9 @@ public class Sunny {
         jda.addEventListener(commandManager);
 
         logger.info("{} commands registered.", commandManager.getCommands().size());
+    }
+
+    public static CommandManager getCommandManager() {
+        return commandManager;
     }
 }

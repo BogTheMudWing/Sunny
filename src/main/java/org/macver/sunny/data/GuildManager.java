@@ -5,14 +5,18 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.hooks.EventListener;
 import org.jetbrains.annotations.NotNull;
+import org.macver.sunny.Sunny;
 import org.macver.sunny.data.type.GuildConfiguration;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class GuildManager {
+public class GuildManager implements EventListener {
 
     public GuildConfiguration getGuildConfiguration(@NotNull Guild guild) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -36,4 +40,16 @@ public class GuildManager {
     public File getFile(@NotNull Guild guild) {
         return new File("indexes/" + guild.getId() + ".json");
     }
+
+    @Override
+    public void onEvent(@NotNull GenericEvent event) {
+        if (!(event instanceof GuildJoinEvent joinEvent)) {
+            return;
+        }
+
+        Guild guild = joinEvent.getGuild();
+        Sunny.getCommandManager().addCommandsToGuild(guild);
+
+    }
+
 }

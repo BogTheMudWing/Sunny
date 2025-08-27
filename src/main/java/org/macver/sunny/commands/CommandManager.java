@@ -32,6 +32,12 @@ public class CommandManager extends ListenerAdapter {
         }
     }
 
+    public void addCommandsToGuild(Guild guild) {
+        for (SlashCommand command : commands) {
+            guild.upsertCommand(command.getData()).queue();
+        }
+    }
+
     public List<SlashCommand> getCommands() {
         return commands;
     }
