@@ -6,6 +6,9 @@ A smart, friendly support helper Discord bot.
 - [Get Started](https://sunny.macver.org/start)
 - [Discover More](https://sunny.macver.org/discover)
 
+ > [!NOTE]
+ > This repository is mirrored to [GitHub](https://github.com/BogTheMudWing/Sunny) for visibility. Issues and pull requests should be made on [Macver Code Athenaeum](https://code.macver.org/Bog/Sunny).
+
 ## About
 
 Sunny is a Discord bot written in Java that automatically responds to user queries. It is designed first to answer questions and deliver support, but it can be used for general-purpose auto-replies too.
