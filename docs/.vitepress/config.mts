@@ -9,7 +9,8 @@ export default defineConfig({
     nav: [
       { text: 'Discover', link: '/discover' },
       { text: 'Start', link: '/start' },
-      { text: 'Invite', link: 'https://discord.com/oauth2/authorize?client_id=1384182700285493380' }
+      { text: 'Invite', link: 'https://discord.com/oauth2/authorize?client_id=1384182700285493380' },
+      { text: 'Support', link: 'https://discord.gg/nPTkDWbMVJ' }
     ],
 
     sidebar: [

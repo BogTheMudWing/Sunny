@@ -85,3 +85,5 @@ Now, when a message is sent to that channel, Sunny will check if it's a question
 <DiscordMessage authorUrl=./images/cat.jpg authorName="Bog" messageContent="Can I be a helper?" />
 <br>
 <DiscordMessage authorUrl=./images/sunny.webp authorName="Sunny" messageContent="Hey, Bog! I found something that might be useful. If it’s not quite right, don’t worry—a helpful human will be with you soon!" embedTitle="Joining the Staff Team" embedDescription="We aren't looking for new staff members right now. We open applications from time to time, so keep an eye on the announcements channel." />
+
+If you need help with Sunny, you can find support in the [Sunny Central](https://discord.gg/nPTkDWbMVJ) guild.
